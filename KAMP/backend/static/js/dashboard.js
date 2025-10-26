@@ -338,3 +338,189 @@ function createConfusionMatrix(prefix) {
         options: chartOptions
     });
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+// 20251027 - 정기홍 > 학습 데이터 불러와서 뿌려주기
+//////////////////////////////////////////////////////////////////////////////////
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await renderTabCTrainingChart();
+    await renderTabCPredictionChart();
+    await renderTabCPredVsActualChart();
+    await renderTabCEpochChart();
+});
+
+// ① 모델 학습 추이 (Loss / MAE)
+async function renderTabCTrainingChart() {
+    const res = await fetch("/api/training-log");
+    const data = await res.json();
+    if (data.error) return console.error(data.error);
+
+    const ctx = document.getElementById("tab_c_training_chart").getContext("2d");
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: data.epoch,
+            datasets: [
+                {
+                    label: "Train Loss",
+                    data: data.loss,
+                    borderColor: "rgba(0, 123, 255, 1)",
+                    fill: false,
+                    borderWidth: 2,
+                    tension: 0.2
+                },
+                {
+                    label: "Validation Loss",
+                    data: data.val_loss,
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderDash: [5, 5],
+                    fill: false,
+                    borderWidth: 2,
+                    tension: 0.2
+                },
+                {
+                    label: "Train MAE",
+                    data: data.mae,
+                    borderColor: "rgba(0, 200, 100, 1)",
+                    fill: false,
+                    borderWidth: 2,
+                    tension: 0.2
+                },
+                {
+                    label: "Validation MAE",
+                    data: data.val_mae,
+                    borderColor: "rgba(255, 180, 0, 1)",
+                    borderDash: [5, 5],
+                    fill: false,
+                    borderWidth: 2,
+                    tension: 0.2
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "bottom" },
+                title: { display: true, text: "모델 학습 추이 (Loss / MAE)" }
+            },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
+
+// ② 실제 수주량 vs 예측 수주량
+async function renderTabCPredictionChart() {
+    const res = await fetch("/api/prediction-result");
+    const data = await res.json();
+    if (data.error) return console.error(data.error);
+
+    const ctx = document.getElementById("tab_c_prediction_chart").getContext("2d");
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: data.index,
+            datasets: [
+                {
+                    label: "Actual",
+                    data: data.actual,
+                    borderColor: "rgba(0, 123, 255, 1)",
+                    fill: false,
+                    borderWidth: 2,
+                    tension: 0.2
+                },
+                {
+                    label: "Predicted",
+                    data: data.predicted,
+                    borderColor: "rgba(255, 99, 132, 1)",
+                    borderDash: [5, 5],
+                    fill: false,
+                    borderWidth: 2,
+                    tension: 0.2
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "bottom" },
+                title: { display: true, text: "실제 수주량 vs 예측 수주량" }
+            },
+            scales: { y: { beginAtZero: false } }
+        }
+    });
+}
+
+// ③ 예측 vs 실제 (산점도)
+async function renderTabCPredVsActualChart() {
+    const res = await fetch("/api/prediction-result");
+    const data = await res.json();
+    if (data.error) return console.error(data.error);
+
+    const ctx = document.getElementById("tab_c_pred_vs_actual_chart").getContext("2d");
+    new Chart(ctx, {
+        type: "scatter",
+        data: {
+            datasets: [
+                {
+                    label: "예측 vs 실제",
+                    data: data.actual.map((a, i) => ({ x: a, y: data.predicted[i] })),
+                    backgroundColor: "rgba(75, 192, 192, 0.7)"
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                title: { display: true, text: "Predicted vs Actual (산점도)" },
+                legend: { display: false }
+            },
+            scales: {
+                x: { title: { display: true, text: "Actual" } },
+                y: { title: { display: true, text: "Predicted" } }
+            }
+        }
+    });
+}
+
+// ④ 에포크별 정확도 (MAE)
+async function renderTabCEpochChart() {
+    const res = await fetch("/api/training-log");
+    const data = await res.json();
+    if (data.error) return console.error(data.error);
+
+    const ctx = document.getElementById("tab_c_epochs_chart").getContext("2d");
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: data.epoch,
+            datasets: [
+                {
+                    label: "Train MAE",
+                    data: data.mae,
+                    borderColor: "rgba(0, 200, 100, 1)",
+                    fill: false,
+                    borderWidth: 2,
+                    tension: 0.2
+                },
+                {
+                    label: "Validation MAE",
+                    data: data.val_mae,
+                    borderColor: "rgba(255, 180, 0, 1)",
+                    borderDash: [5, 5],
+                    fill: false,
+                    borderWidth: 2,
+                    tension: 0.2
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "bottom" },
+                title: { display: true, text: "MAE per Epoch (CNN-LSTM)" }
+            },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+}
