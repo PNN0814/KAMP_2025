@@ -34,7 +34,7 @@
                 </button>
                 <button class="nav-item" data-tab="preprocessing3" onclick="switchTab('preprocessing3')">
                     <span class="nav-icon">🔶</span>
-                    <span>전처리 C</span>
+                    <span>C TAB</span>
                 </button>
             </nav>
 
@@ -234,7 +234,7 @@
             <!-- Tab Content: Preprocessing 3 -->
             <div id="tab-preprocessing3" class="tab-content">
                 <div class="content-header">
-                    <h1 class="content-title">전처리 C - 이상치 제거</h1>
+                    <h1 class="content-title">C TAB - 최근 7일 데이터 기반 다음날 예측</h1>
                     <div class="header-stats">
                         <div class="stat-badge">
                             <span class="stat-label">처리 데이터</span>
@@ -248,6 +248,47 @@
                 </div>
 
                 <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">모델 학습 추이 (Loss / MAE)</h3>
+                            <span class="chart-subtitle">모델 학습 추이 (Loss / MAE)</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tab_c_training_chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">실제 수주량 vs 예측 수주량</h3>
+                            <span class="chart-subtitle">실제 수주량 vs 예측 수주량</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tab_c_prediction_chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">예측 vs 실제 값</h3>
+                            <span class="chart-subtitle">Predicted vs Actual</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tab_c_pred_vs_actual_chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">에포크별 정확도</h3>
+                            <span class="chart-subtitle">Accuracy per Epoch</span>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tab_c_epochs_chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!--
                     <div class="chart-card">
                         <div class="chart-header">
                             <h3 class="chart-title">예측 vs 실제 값</h3>
@@ -268,6 +309,7 @@
                         </div>
                     </div>
 
+                    
                     <div class="chart-card">
                         <div class="chart-header">
                             <h3 class="chart-title">에포크별 정확도</h3>
@@ -287,6 +329,7 @@
                             <canvas id="chart-prep3-confusion"></canvas>
                         </div>
                     </div>
+                    -->
                 </div>
             </div>
         </main>
