@@ -43,7 +43,7 @@ output_path     = os.path.join(RESULT_DIR, "01_00_전처리_결측치_제거.csv
 # 원본 데이터셋 불러오고 세팅
 #####################################################################
 
-df = pd.read_csv(file_path, na_values = ["", " ", "NA", "N/A", "na", "Na", "null", "NULL", "-", "--", "None"])
+df = pd.read_csv(file_path, encoding = "utf-8-sig", na_values = ["", " ", "NA", "N/A", "na", "Na", "null", "NULL", "-", "--", "None"])
 
 print(f"원본 데이터셋 로드 완료 / 행 개수 : {df.shape[0]}, 열 개수 : {df.shape[1]}")
 
