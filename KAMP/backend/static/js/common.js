@@ -257,3 +257,63 @@ window.utils = {
     addEventListenerWithCleanup,
     waitForElement
 };
+
+// dashboard에서 사용할 common 코드
+// Navigation
+function navigateToIntro() {
+    window.location.href = '/';
+}
+
+// Tab Switching
+function switchTab(tabName) {
+    // Update nav items
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+}
+
+// Chart Configuration
+Chart.defaults.color = '#cbd5e1';
+Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.2)';
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            display: true,
+            labels: {
+                color: '#cbd5e1',
+                padding: 12,
+                font: { size: 12 }
+            }
+        },
+        tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            titleColor: '#ffffff',
+            bodyColor: '#cbd5e1',
+            borderColor: 'rgba(59, 130, 246, 0.5)',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: true
+        }
+    },
+    scales: {
+        x: {
+            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+            ticks: { color: '#94a3b8' }
+        },
+        y: {
+            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+            ticks: { color: '#94a3b8' }
+        }
+    }
+};
