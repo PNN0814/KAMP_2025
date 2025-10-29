@@ -1,3 +1,9 @@
+"""
+파일명 : main.py
+설명   : FastAPI 백엔드 (인트로 + 대시보드)
+경로   : KAMP/backend/main.py
+"""
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -5,72 +11,79 @@ from fastapi.templating import Jinja2Templates
 import pandas as pd
 import os
 
-# FastAPI 초기화
 app = FastAPI()
 
-# ~/KAMP/backend 까지의 경로 세팅
-BASE_DIR            = os.path.dirname(os.path.abspath(__file__))
-
-# 각 폴더에 맞게 경로 세팅
-TEMPLATES_DIR       = os.path.join(BASE_DIR, "templates")
-STATIC_DIR          = os.path.join(BASE_DIR, "static")
-MODELS_OUTPUT_DIR   = os.path.join(os.path.dirname(BASE_DIR), "models", "outputs")
+# ---------------------------------
+# 경로 설정
+# ---------------------------------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+OUTPUT_DIR = os.path.join(BASE_DIR, "..", "models", "outputs", "tab_a_ensemble_forecast")
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+templates = Jinja2Templates(directory=TEMPLATE_DIR)
 
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
-
-#####################################################################
-# 페이지 라우팅
-#####################################################################
-
-# 인트로 페이지
+# ---------------------------------
+# 기본 라우팅
+# ---------------------------------
 @app.get("/", response_class=HTMLResponse)
 def intro_page(request: Request):
     return templates.TemplateResponse("intro.html", {"request": request})
 
-# 대시보드 페이지
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard_page(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
-#####################################################################
-# API : CNN-LSTM 학습 로그
-#####################################################################
 
-@app.get("/api/training-log")
-def get_training_log():
-    file_path = os.path.join(MODELS_OUTPUT_DIR, "cnn_lstm_training_log.csv")
-    if not os.path.exists(file_path):
-        return JSONResponse(content={"error": "학습 로그 파일이 존재하지 않습니다."}, status_code=404)
+# ---------------------------------
+# 📊 전처리 A - 데이터 시각화용 API
+# ---------------------------------
+@app.get("/api/preprocessing-a")
+def get_preprocessing_a_data():
+    """
+    - outputs/tab_a_ensemble_forecast/*.csv 로부터 데이터 로드
+    - Product_Number별 최근 3일 예측값 + MAE/SMAPE/Accuracy
+    - ensemble_summary.csv 파일은 완전히 제외
+    """
+    if not os.path.exists(OUTPUT_DIR):
+        return JSONResponse({"error": "결과 폴더를 찾을 수 없습니다."}, status_code=404)
 
-    df = pd.read_csv(file_path)
-    data = {
-        "epoch": list(range(len(df))),
-        "loss": df["loss"].tolist(),
-        "val_loss": df["val_loss"].tolist(),
-        "mae": df["mean_absolute_error"].tolist(),
-        "val_mae": df["val_mean_absolute_error"].tolist()
-    }
-    return JSONResponse(content=data)
+    dfs = []
+    for file in os.listdir(OUTPUT_DIR):
+        if not file.endswith(".csv"):
+            continue
 
-#####################################################################
-# API : CNN-LSTM 예측 결과 (실제 vs 예측)
-#####################################################################
+        # ✅ ensemble_summary.csv는 완전히 무시
+        if file.lower().startswith("ensemble_summary"):
+            continue
 
-@app.get("/api/prediction-result")
-def get_prediction_result():
-    file_path = os.path.join(MODELS_OUTPUT_DIR, "cnn_lstm_prediction_result.csv")
-    if not os.path.exists(file_path):
-        return JSONResponse(content={"error": "예측 결과 파일이 존재하지 않습니다."}, status_code=404)
+        path = os.path.join(OUTPUT_DIR, file)
+        try:
+            df = pd.read_csv(path)
 
-    df = pd.read_csv(file_path)
-    if "Actual_Restored" not in df.columns or "Predicted_Restored" not in df.columns:
-        return JSONResponse(content={"error": "예측 결과 파일에 필요한 컬럼이 없습니다."}, status_code=400)
+            # 안전하게 Product_Number 컬럼 확인
+            if "Product_Number" not in df.columns:
+                continue
 
-    data = {
-        "actual": df["Actual_Restored"].tolist(),
-        "predicted": df["Predicted_Restored"].tolist(),
-        "index": list(range(len(df)))
-    }
-    return JSONResponse(content=data)
+            df["Product_Number"] = os.path.splitext(file)[0].replace("_pred", "")
+            dfs.append(df)
+        except Exception as e:
+            print(f"[WARN] {file} 읽기 실패: {e}")
+            continue
+
+    if not dfs:
+        return JSONResponse({"error": "CSV 파일을 읽을 수 없습니다."}, status_code=404)
+
+    df_all = pd.concat(dfs, ignore_index=True)
+    df_all = df_all.fillna(0)
+
+    # 숫자형 변환
+    numeric_cols = ["Pred_Value", "MAE", "SMAPE", "Accuracy"]
+    for col in numeric_cols:
+        if col in df_all.columns:
+            df_all[col] = pd.to_numeric(df_all[col], errors="coerce").fillna(0)
+
+    df_all = df_all.sort_values(by="Product_Number").reset_index(drop=True)
+
+    return JSONResponse(content=df_all.to_dict(orient="records"))
