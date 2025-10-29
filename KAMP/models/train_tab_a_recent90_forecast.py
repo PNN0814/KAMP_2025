@@ -6,9 +6,8 @@
          - 추가 피처: NoOrderFlag(0여부), ZeroRatio30(0비율)
          - Target smoothing 적용
          - MAE 기반 손실함수 사용
-         - RMSE / MAPE / R² 계산 및 로그 출력
+         - MAE / MAPE / 정확도(%) 계산 및 로그 출력
          - 최대 15회 반복 학습
-         - 정확도/MAE/상태 JSON 저장
          - 정확도 음수 방지 (0~100% 범위 제한)
          - 평균값이 너무 작을 경우 정확도 계산 보정
          - MAE 40 이상인 Product 자동 재학습 (최대 5회 반복)
@@ -27,7 +26,7 @@ import pandas as pd
 import matplotlib
 from datetime import timedelta
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import mean_absolute_error
 from keras.models import Sequential
 from keras.layers import Conv1D, MaxPooling1D, LSTM, Dropout, Dense
 from keras.callbacks import EarlyStopping
@@ -174,7 +173,7 @@ for product in product_list:
     callbacks = [EarlyStopping(monitor='val_loss', patience=PATIENCE, restore_best_weights=True)]
 
     best_accuracy = 0
-    mae_val = rmse_val = mape_val = r2_val = None
+    mae_val = mape_val = None
 
     for retry in range(1, MAX_RETRY + 1):
         print(f"\n[{product}] 학습 시도 {retry}/{MAX_RETRY}")
@@ -192,9 +191,7 @@ for product in product_list:
         y_val_restored = scaler_target.inverse_transform(y_val.flatten().reshape(-1, 1)).flatten()
 
         mae_val = mean_absolute_error(y_val_restored, val_pred_restored)
-        rmse_val = mean_squared_error(y_val_restored, val_pred_restored, squared=False)
         mape_val = np.mean(np.abs((y_val_restored - val_pred_restored) / np.clip(y_val_restored, 1e-5, None))) * 100
-        r2_val = r2_score(y_val_restored, val_pred_restored)
 
         mean_actual = max(np.mean(y_val_restored), 10)
         accuracy = 100 - (mae_val / mean_actual * 100)
@@ -203,29 +200,19 @@ for product in product_list:
         if accuracy > best_accuracy:
             best_accuracy = accuracy
 
-        print(f"[{product}] MAE: {mae_val:.2f} | RMSE: {rmse_val:.2f} | MAPE: {mape_val:.2f}% | R²: {r2_val:.2f} | 정확도: {accuracy:.2f}%")
+        print(f"[{product}] MAE: {mae_val:.2f} | MAPE: {mape_val:.2f}% | 정확도: {accuracy:.2f}%")
 
         if best_accuracy >= TARGET_ACCURACY:
             print(f"[{product}] 목표 정확도 도달 ({best_accuracy:.2f}%) → 조기 종료")
             break
 
-    if best_accuracy < 60:
-        status = "경고"
-    elif best_accuracy < 80:
-        status = "주의"
-    else:
-        status = "정확"
-
-    print(f"[{product}] 최종 결과 → MAE: {mae_val:.4f}, RMSE: {rmse_val:.4f}, MAPE: {mape_val:.2f}%, R²: {r2_val:.2f}, 정확도: {best_accuracy:.2f}%, 상태: {status}")
+    print(f"[{product}] 최종 결과 → MAE: {mae_val:.4f}, MAPE: {mape_val:.2f}%, 정확도: {best_accuracy:.2f}%")
 
     accuracy_records.append({
         "Product_Number": product,
         "MAE": round(float(mae_val), 4),
-        "RMSE": round(float(rmse_val), 4),
         "MAPE(%)": round(float(mape_val), 2),
-        "R²": round(float(r2_val), 4),
-        "Accuracy(%)": round(float(best_accuracy), 2),
-        "Status": status
+        "Accuracy(%)": round(float(best_accuracy), 2)
     })
 
 #####################################################################
@@ -236,39 +223,32 @@ with open(ACC_JSON_PATH, "w", encoding="utf-8") as jf:
     json.dump(accuracy_records, jf, ensure_ascii=False, indent=4)
 
 print("\n================== 학습 결과 요약 ==================")
-print("{:<15} {:>10} {:>10} {:>10} {:>8} {:>12} {:>10}".format("Product_Number", "MAE", "RMSE", "MAPE(%)", "R²", "Accuracy(%)", "Status"))
-print("--------------------------------------------------------------------------")
+print("{:<15} {:>10} {:>12} {:>12}".format("Product_Number", "MAE", "MAPE(%)", "Accuracy(%)"))
+print("-------------------------------------------------------------")
 
 for r in accuracy_records:
-    print("{:<15} {:>10.4f} {:>10.4f} {:>10.2f} {:>8.2f} {:>12.2f} {:>10}".format(
-        r["Product_Number"], r["MAE"], r["RMSE"], r["MAPE(%)"], r["R²"], r["Accuracy(%)"], r["Status"]
+    print("{:<15} {:>10.4f} {:>12.2f} {:>12.2f}".format(
+        r["Product_Number"], r["MAE"], r["MAPE(%)"], r["Accuracy(%)"]
     ))
 
-print("==========================================================================\n")
+print("=============================================================\n")
 
 # 전체 평균 계산
 mean_mae = np.mean([r["MAE"] for r in accuracy_records])
-mean_rmse = np.mean([r["RMSE"] for r in accuracy_records])
 mean_mape = np.mean([r["MAPE(%)"] for r in accuracy_records])
-mean_r2 = np.mean([r["R²"] for r in accuracy_records])
 mean_acc = np.mean([r["Accuracy(%)"] for r in accuracy_records])
 
 print("📊 [전체 평균 성능 요약]")
 print(f"MAE 평균     : {mean_mae:.4f}")
-print(f"RMSE 평균    : {mean_rmse:.4f}")
 print(f"MAPE 평균(%) : {mean_mape:.2f}%")
-print(f"R² 평균      : {mean_r2:.4f}")
 print(f"정확도 평균(%) : {mean_acc:.2f}%")
-print("==========================================================================\n")
+print("=============================================================\n")
 
 summary = {
     "Product_Number": "전체 평균",
     "MAE": round(mean_mae, 4),
-    "RMSE": round(mean_rmse, 4),
     "MAPE(%)": round(mean_mape, 2),
-    "R²": round(mean_r2, 4),
-    "Accuracy(%)": round(mean_acc, 2),
-    "Status": "요약"
+    "Accuracy(%)": round(mean_acc, 2)
 }
 
 accuracy_records.insert(0, summary)
