@@ -264,21 +264,6 @@ function navigateToIntro() {
     window.location.href = '/';
 }
 
-// Tab Switching
-function switchTab(tabName) {
-    // Update nav items
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-
-    // Update tab content
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-}
-
 // Chart Configuration
 Chart.defaults.color = '#cbd5e1';
 Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.2)';
@@ -317,3 +302,29 @@ const chartOptions = {
         }
     }
 };
+
+// A~B 까지의 JS 알아서 불러오기
+document.addEventListener("DOMContentLoaded", () => {
+    const navItems = document.querySelectorAll(".nav-item");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    // 최초 페이지 진입 시 A 탭 활성화
+    tabContents.forEach(c => c.classList.remove("active"));
+    document.getElementById("tab-preprocessing1")?.classList.add("active");
+    navItems.forEach(i => i.classList.remove("active"));
+    document.querySelector(".nav-item[onclick*='preprocessing1']")?.classList.add("active");
+
+    // 탭 전환
+    window.switchTab = function(tabName) {
+        // 모든 탭 숨김
+        tabContents.forEach(c => c.classList.remove("active"));
+        navItems.forEach(i => i.classList.remove("active"));
+
+        // 클릭한 탭만 표시
+        document.getElementById(`tab-${tabName}`)?.classList.add("active");
+        document.querySelector(`.nav-item[onclick*='${tabName}']`)?.classList.add("active");
+
+        // 스크롤 초기화
+        document.querySelector(".main-content")?.scrollTo({ top: 0, behavior: "smooth" });
+    };
+});
