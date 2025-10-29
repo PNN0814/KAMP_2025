@@ -23,3 +23,7 @@ matplotlib==3.5.2
 
 # 환경 변수
 python-dotenv==1.0.0
+
+# 머신러닝 (부스팅 계열)
+lightgbm==3.3.5
+catboost==1.2.3
