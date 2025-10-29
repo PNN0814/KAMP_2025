@@ -20,11 +20,7 @@
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-item active" data-tab="all" onclick="switchTab('all')">
-                    <span class="nav-icon">📊</span>
-                    <span>전체 데이터</span>
-                </button>
-                <button class="nav-item" data-tab="preprocessing1" onclick="switchTab('preprocessing1')">
+                <button class="nav-item active" data-tab="preprocessing1" onclick="switchTab('preprocessing1')">
                     <span class="nav-icon">🔹</span>
                     <span>전처리 A</span>
                 </button>
@@ -32,89 +28,13 @@
                     <span class="nav-icon">🔸</span>
                     <span>전처리 B</span>
                 </button>
-                <button class="nav-item" data-tab="preprocessing3" onclick="switchTab('preprocessing3')">
-                    <span class="nav-icon">🔶</span>
-                    <span>전처리 C</span>
-                </button>
             </nav>
-
-            <div class="sidebar-footer">
-                <div class="model-info">
-                    <div class="info-item">
-                        <span class="info-label">모델 상태</span>
-                        <span class="info-value active">Active</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">마지막 업데이트</span>
-                        <span class="info-value">2분 전</span>
-                    </div>
-                </div>
-            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Tab Content: All Data -->
-            <div id="tab-all" class="tab-content active">
-                <div class="content-header">
-                    <h1 class="content-title">전체 데이터 개요</h1>
-                    <div class="header-stats">
-                        <div class="stat-badge">
-                            <span class="stat-label">총 데이터</span>
-                            <span class="stat-value">1.2M</span>
-                        </div>
-                        <div class="stat-badge">
-                            <span class="stat-label">평균 정확도</span>
-                            <span class="stat-value">97.8%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">전처리별 모델 성능 비교</h3>
-                            <span class="chart-subtitle">Accuracy Comparison</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-all-comparison"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">예측 정확도 추이</h3>
-                            <span class="chart-subtitle">Prediction Accuracy Over Time</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-all-accuracy"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">데이터 분포</h3>
-                            <span class="chart-subtitle">Data Distribution</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-all-distribution"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">손실 함수 (Loss)</h3>
-                            <span class="chart-subtitle">Training & Validation Loss</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-all-loss"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab Content: Preprocessing 1 -->
-            <div id="tab-preprocessing1" class="tab-content">
+            <!-- 전처리 A 탭 -->
+            <div id="tab-preprocessing1" class="tab-content active">
                 <div class="content-header">
                     <h1 class="content-title">전처리 A - 정규화 & 결측치 제거</h1>
                     <div class="header-stats">
@@ -129,45 +49,38 @@
                     </div>
                 </div>
 
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">예측 vs 실제 값</h3>
-                            <span class="chart-subtitle">Predicted vs Actual</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-prep1-prediction"></canvas>
-                        </div>
-                    </div>
+                <!-- 🧭 서브탭 메뉴 -->
+                <div class="subtab-container">
+                    <button class="subtab active" data-target="subtab-predict">예측 수주량(막대)</button>
+                    <button class="subtab" data-target="subtab-table">예측 수주량(테이블)</button>
+                    <button class="subtab" data-target="subtab-metrics">지표 비교</button>
+                    <button class="subtab" data-target="subtab-accuracy">정확도 비교</button>
+                </div>
 
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">특성 중요도</h3>
-                            <span class="chart-subtitle">Feature Importance</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-prep1-features"></canvas>
-                        </div>
+                <!-- 🧩 각 서브탭 그래프 영역 -->
+                <div id="subtab-predict" class="subtab-content active">
+                    <div class="filter-container" id="filter-predict"></div>
+                    <div class="chart-container">
+                        <canvas id="chart-prep1-prediction"></canvas>
                     </div>
+                </div>
 
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">에포크별 정확도</h3>
-                            <span class="chart-subtitle">Accuracy per Epoch</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-prep1-epochs"></canvas>
-                        </div>
+                <div id="subtab-table" class="subtab-content">
+                    <div class="filter-container" id="filter-table"></div>
+                    <div class="chart-container" id="chart-prep1-table"></div>
+                </div>
+
+                <div id="subtab-metrics" class="subtab-content">
+                    <div class="filter-container" id="filter-metrics"></div>
+                    <div class="chart-container">
+                        <canvas id="chart-prep1-features"></canvas>
                     </div>
+                </div>
 
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">혼동 행렬</h3>
-                            <span class="chart-subtitle">Confusion Matrix</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-prep1-confusion"></canvas>
-                        </div>
+                <div id="subtab-accuracy" class="subtab-content">
+                    <div class="filter-container" id="filter-accuracy"></div>
+                    <div class="chart-container">
+                        <canvas id="chart-prep1-epochs"></canvas>
                     </div>
                 </div>
             </div>
@@ -230,115 +143,11 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Tab Content: Preprocessing 3 -->
-            <div id="tab-preprocessing3" class="tab-content">
-                <div class="content-header">
-                    <h1 class="content-title">전처리 C - 최근 7일 데이터 기반 다음날 예측</h1>
-                    <div class="header-stats">
-                        <div class="stat-badge">
-                            <span class="stat-label">처리 데이터</span>
-                            <span class="stat-value">350K</span>
-                        </div>
-                        <div class="stat-badge">
-                            <span class="stat-label">정확도</span>
-                            <span class="stat-value">97.9%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">모델 학습 추이 (Loss / MAE)</h3>
-                            <span class="chart-subtitle">모델 학습 추이 (Loss / MAE)</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="tab_c_training_chart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">실제 수주량 vs 예측 수주량</h3>
-                            <span class="chart-subtitle">실제 수주량 vs 예측 수주량</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="tab_c_prediction_chart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">예측 vs 실제 값</h3>
-                            <span class="chart-subtitle">Predicted vs Actual</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="tab_c_pred_vs_actual_chart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">에포크별 정확도</h3>
-                            <span class="chart-subtitle">Accuracy per Epoch</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="tab_c_epochs_chart"></canvas>
-                        </div>
-                    </div>
-
-                    <!--
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">예측 vs 실제 값</h3>
-                            <span class="chart-subtitle">Predicted vs Actual</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-prep3-prediction"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">특성 중요도</h3>
-                            <span class="chart-subtitle">Feature Importance</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-prep3-features"></canvas>
-                        </div>
-                    </div>
-
-                    
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">에포크별 정확도</h3>
-                            <span class="chart-subtitle">Accuracy per Epoch</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-prep3-epochs"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">혼동 행렬</h3>
-                            <span class="chart-subtitle">Confusion Matrix</span>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="chart-prep3-confusion"></canvas>
-                        </div>
-                    </div>
-                    -->
-                </div>
-            </div>
         </main>
     </div>
 
     <script src="/static/js/common.js"></script>
-    <script src="/static/js/dashboard_ALL.js"></script>
     <script src="/static/js/dashboard_A.js"></script>
     <script src="/static/js/dashboard_B.js"></script>
-    <script src="/static/js/dashboard_C.js"></script>
 </body>
 </html>
