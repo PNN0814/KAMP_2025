@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/static/css/common.css">
     <link rel="stylesheet" href="/static/css/dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 </head>
 <body>
     <div class="dashboard-container">
@@ -22,11 +23,11 @@
             <nav class="sidebar-nav">
                 <button class="nav-item active" data-tab="preprocessing1" onclick="switchTab('preprocessing1')">
                     <span class="nav-icon">🔹</span>
-                    <span>전처리 A</span>
+                    <span>A TAB</span>
                 </button>
                 <button class="nav-item" data-tab="preprocessing2" onclick="switchTab('preprocessing2')">
                     <span class="nav-icon">🔸</span>
-                    <span>전처리 B</span>
+                    <span>B TAB</span>
                 </button>
             </nav>
         </aside>
@@ -36,14 +37,18 @@
             <!-- 전처리 A 탭 -->
             <div id="tab-preprocessing1" class="tab-content active">
                 <div class="content-header">
-                    <h1 class="content-title">전처리 A - 정규화 & 결측치 제거</h1>
+                    <h1 class="content-title">A TAB - T일 예정 수주량 90일치 기준 최대 3일치 예상 수주량</h1>
                     <div class="header-stats">
                         <div class="stat-badge">
-                            <span class="stat-label">처리 데이터</span>
-                            <span class="stat-value">400K</span>
+                            <span class="stat-label">MAE 평균</span>
+                            <span class="stat-value">98.2%</span>
                         </div>
                         <div class="stat-badge">
-                            <span class="stat-label">정확도</span>
+                            <span class="stat-label">SMAPE 평균</span>
+                            <span class="stat-value">98.2%</span>
+                        </div>
+                        <div class="stat-badge">
+                            <span class="stat-label">Accuracy 평균</span>
                             <span class="stat-value">98.2%</span>
                         </div>
                     </div>
@@ -88,7 +93,7 @@
             <!-- Tab Content: Preprocessing 2 -->
             <div id="tab-preprocessing2" class="tab-content">
                 <div class="content-header">
-                    <h1 class="content-title">전처리 B - 특성 엔지니어링</h1>
+                    <h1 class="content-title">B TAB - 특성 엔지니어링</h1>
                     <div class="header-stats">
                         <div class="stat-badge">
                             <span class="stat-label">처리 데이터</span>
