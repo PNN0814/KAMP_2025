@@ -119,13 +119,13 @@ body {
 }
 
 .info-label {
-    font-size: 13px;
+    font-size: 15px;
     color: #94a3b8;
 }
 
 .info-value {
-    font-size: 13px;
-    color: #cbd5e1;
+    font-size: 18px;
+    color: #ffffff;
     font-weight: 600;
 }
 
@@ -198,6 +198,8 @@ body {
     backdrop-filter: blur(10px);
     border: 1px solid rgba(148, 163, 184, 0.2);
     border-radius: 10px;
+    width: 152px;
+    text-align: center;
 }
 
 .stat-label {
@@ -549,4 +551,23 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* 대시보드 헤더 타이틀 (모델명 + 설명 분리) */
+.content-title {
+    line-height: 1.4;
+    margin-top: 2px;
+}
+
+.content-title .model-title {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.content-title .model-desc {
+    display: block;
+    font-size: 1.10rem;
+    font-weight: 400;
+    color: #a0aec0;
+    margin-top: 8px;
 }

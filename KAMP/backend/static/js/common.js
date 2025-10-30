@@ -264,14 +264,15 @@ function navigateToIntro() {
     window.location.href = '/';
 }
 
-// Chart Configuration
+// Chart Configuration (공통 Chart 옵션 추가)
 Chart.defaults.color = '#cbd5e1';
 Chart.defaults.borderColor = 'rgba(148, 163, 184, 0.2)';
 Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
-const chartOptions = {
+// ✅ 공통 Chart 옵션 객체 추가 (A/B에서 공통 사용)
+window.chartBaseOptions = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
     plugins: {
         legend: {
             display: true,
@@ -303,28 +304,61 @@ const chartOptions = {
     }
 };
 
-// A~B 까지의 JS 알아서 불러오기
+// ✅ 전역 Chart 인스턴스 분리 방지용 네임스페이스 추가
+window.chartInstances_A = {};
+window.chartInstances_B = {};
+
+// 기존 common.js 아래쪽의 탭 전환 부분 교체 또는 추가
 document.addEventListener("DOMContentLoaded", () => {
     const navItems = document.querySelectorAll(".nav-item");
     const tabContents = document.querySelectorAll(".tab-content");
 
-    // 최초 페이지 진입 시 A 탭 활성화
+    // 최초 페이지 진입 시 A탭 활성화
     tabContents.forEach(c => c.classList.remove("active"));
     document.getElementById("tab-preprocessing1")?.classList.add("active");
     navItems.forEach(i => i.classList.remove("active"));
-    document.querySelector(".nav-item[onclick*='preprocessing1']")?.classList.add("active");
+    document.querySelector(".nav-item[data-tab='preprocessing1']")?.classList.add("active");
 
-    // 탭 전환
-    window.switchTab = function(tabName) {
-        // 모든 탭 숨김
+    // ✅ 전역 탭 전환 함수 (리셋 + 기본 렌더 포함)
+    window.switchTab = function (tabName) {
+        // 모든 탭 비활성화
         tabContents.forEach(c => c.classList.remove("active"));
         navItems.forEach(i => i.classList.remove("active"));
 
-        // 클릭한 탭만 표시
+        // 선택 탭 활성화
         document.getElementById(`tab-${tabName}`)?.classList.add("active");
-        document.querySelector(`.nav-item[onclick*='${tabName}']`)?.classList.add("active");
-
-        // 스크롤 초기화
+        document.querySelector(`.nav-item[data-tab='${tabName}']`)?.classList.add("active");
         document.querySelector(".main-content")?.scrollTo({ top: 0, behavior: "smooth" });
+
+        // ✅ 각 탭별 기본 상태 강제 리셋
+        if (tabName === "preprocessing1") {
+            // A탭 초기화
+            document.querySelectorAll("#tab-preprocessing1 .subtab").forEach(t => t.classList.remove("active"));
+            document.querySelector("#tab-preprocessing1 .subtab[data-target='subtab-predict']")?.classList.add("active");
+            document.querySelectorAll("#tab-preprocessing1 .subtab-content").forEach(c => c.classList.remove("active"));
+            document.getElementById("subtab-predict")?.classList.add("active");
+
+            // 필터 초기화
+            document.querySelectorAll("#tab-preprocessing1 .filter-button").forEach(b => b.classList.remove("active"));
+            document.querySelector("#tab-preprocessing1 .filter-button")?.classList.add("active");
+
+            // ✅ 기본 렌더 호출
+            if (window.renderCharts_A) window.renderCharts_A("Product_8");
+        }
+
+        if (tabName === "preprocessing2") {
+            // B탭 초기화
+            document.querySelectorAll("#tab-preprocessing2 .subtab").forEach(t => t.classList.remove("active"));
+            document.querySelector("#tab-preprocessing2 .subtab[data-target='subtab-predict-b']")?.classList.add("active");
+            document.querySelectorAll("#tab-preprocessing2 .subtab-content").forEach(c => c.classList.remove("active"));
+            document.getElementById("subtab-predict-b")?.classList.add("active");
+
+            // 필터 초기화
+            document.querySelectorAll("#tab-preprocessing2 .filter-button").forEach(b => b.classList.remove("active"));
+            document.querySelector("#tab-preprocessing2 .filter-button")?.classList.add("active");
+
+            // ✅ 기본 렌더 호출
+            if (window.renderCharts_B) window.renderCharts_B("Product_8");
+        }
     };
 });
